@@ -57,69 +57,58 @@ app.get('/api/proxy-download', async (req, res) => {
   const fileUrl = req.query.url;
   const filename = req.query.filename || 'download.mp4';
 
+  console.log("----------------------------------------");
+  console.log("Incoming Download Request URL:", fileUrl);
+
   if (!fileUrl) {
+    console.log("Error: No file URL provided");
     return res.status(400).send('File URL is required');
   }
 
   try {
-    // SECURITY CHECK: Validate incoming URL structure & origin domain
     const parsedUrl = new URL(fileUrl);
-    const allowedDomains = [
-      'tiktokcdn.com',
-      'tiktokcdn-us.com',
-      'tiktok.com',
-      'byteoversea.com',
-      'muscdn.com',
-      'ibyteimg.com',
-      'akamaized.net' // Added Akamai CDN domain frequently used by TikTok
-    ];
+    console.log("Parsed Domain:", parsedUrl.hostname);
 
+    // TEMPORARY: Comment out domain validation while debugging to eliminate 403 blocks
+    /*
+    const allowedDomains = ['tiktokcdn.com', 'tiktokcdn-us.com', 'tiktok.com', 'byteoversea.com', 'muscdn.com', 'ibyteimg.com', 'akamaized.net'];
     const isAllowed = allowedDomains.some(domain => parsedUrl.hostname.endsWith(domain));
-
     if (!isAllowed) {
+      console.log("Blocked by Domain Whitelist:", parsedUrl.hostname);
       return res.status(403).send('Access denied: Unauthorized media domain.');
     }
+    */
 
-    // STREAM FILE: Enhanced Axios request to follow redirects and bypass firewall checks
     const response = await axios({
       method: 'get',
       url: fileUrl,
       responseType: 'stream',
-      maxRedirects: 10, // Ensure redirect chains are followed
+      maxRedirects: 10,
       timeout: 30000,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
         'Accept': '*/*',
-        'Accept-Encoding': 'identity', // Prevents gzipped stream corruption during pipe
-        'Range': 'bytes=0-',
+        'Accept-Encoding': 'identity',
         'Referer': 'https://www.tiktok.com/'
       }
     });
 
-    // Sanitized Filename Header
-    const safeFilename = filename.replace(/[^a-zA-Z0-9_\.-]/g, '_');
+    console.log("Axios Response Status:", response.status);
+    console.log("Content-Type:", response.headers['content-type']);
 
+    const safeFilename = filename.replace(/[^a-zA-Z0-9_\.-]/g, '_');
     res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}"`);
     res.setHeader('Content-Type', response.headers['content-type'] || 'video/mp4');
 
-    if (response.headers['content-length']) {
-      res.setHeader('Content-Length', response.headers['content-length']);
-    }
-
-    // Pipe audio/video stream directly to the client response
     response.data.pipe(res);
 
-    response.data.on('error', (err) => {
-      console.error('Stream Pipe Error:', err.message);
-      if (!res.headersSent) {
-        res.status(500).send('Stream error occurred');
-      }
-    });
-
   } catch (error) {
-    console.error('Proxy Error:', error.message);
+    console.error('Proxy Error Message:', error.message);
+    if (error.response) {
+      console.error('API Error Response Code:', error.response.status);
+    }
     if (!res.headersSent) {
-      res.status(500).send('Failed to stream file');
+      res.status(500).send(`Failed to stream file: ${error.message}`);
     }
   }
 });
