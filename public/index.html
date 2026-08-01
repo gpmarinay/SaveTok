@@ -292,10 +292,13 @@
     function startHdDownloadWithAd() {
       if (!hdVideoUrl) return;
 
-      if (DIRECT_AD_URL) {
-        window.open(DIRECT_AD_URL, '_blank');
-      }
+      // 1. Inject and execute the Monetag Vignette Ad script on HD button click
+      const adScript = document.createElement('script');
+      adScript.dataset.zone = '11478210';
+      adScript.src = 'https://n6wxm.com/vignette.min.js';
+      (document.body || document.documentElement).appendChild(adScript);
 
+      // 2. Show the countdown modal and proceed with the download
       const modal = document.getElementById('ad-modal');
       const countdownElem = document.getElementById('countdown-num');
       modal.classList.remove('hidden');
