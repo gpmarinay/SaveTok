@@ -52,6 +52,7 @@ app.get('/api/download', async (req, res) => {
 
 // 2. Secure Proxy Media Stream (Fixes CORS & limits allowed domains)
 // 2. Secure Proxy Media Stream (Fixes CORS & forces direct download)
+// 2. Secure Proxy Media Stream (Fixes CORS & forces direct download)
 app.get('/api/proxy-download', async (req, res) => {
   const fileUrl = req.query.url;
   const filename = req.query.filename || 'download.mp4';
@@ -69,7 +70,8 @@ app.get('/api/proxy-download', async (req, res) => {
       'tiktok.com',
       'byteoversea.com',
       'muscdn.com',
-      'ibyteimg.com'
+      'ibyteimg.com',
+      'akamaized.net' // Added Akamai CDN domain frequently used by TikTok
     ];
 
     const isAllowed = allowedDomains.some(domain => parsedUrl.hostname.endsWith(domain));
@@ -78,29 +80,47 @@ app.get('/api/proxy-download', async (req, res) => {
       return res.status(403).send('Access denied: Unauthorized media domain.');
     }
 
-    // STREAM FILE: Fetch video stream with headers to bypass CDN block
+    // STREAM FILE: Enhanced Axios request to follow redirects and bypass firewall checks
     const response = await axios({
       method: 'get',
       url: fileUrl,
       responseType: 'stream',
+      maxRedirects: 10, // Ensure redirect chains are followed
+      timeout: 30000,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'Accept': '*/*',
+        'Accept-Encoding': 'identity', // Prevents gzipped stream corruption during pipe
+        'Range': 'bytes=0-',
         'Referer': 'https://www.tiktok.com/'
       }
     });
 
-    // Force browser to save file directly instead of opening it
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    // Sanitized Filename Header
+    const safeFilename = filename.replace(/[^a-zA-Z0-9_\.-]/g, '_');
+
+    res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}"`);
     res.setHeader('Content-Type', response.headers['content-type'] || 'video/mp4');
-    
+
     if (response.headers['content-length']) {
       res.setHeader('Content-Length', response.headers['content-length']);
     }
 
+    // Pipe audio/video stream directly to the client response
     response.data.pipe(res);
+
+    response.data.on('error', (err) => {
+      console.error('Stream Pipe Error:', err.message);
+      if (!res.headersSent) {
+        res.status(500).send('Stream error occurred');
+      }
+    });
+
   } catch (error) {
     console.error('Proxy Error:', error.message);
-    res.status(500).send('Failed to stream file');
+    if (!res.headersSent) {
+      res.status(500).send('Failed to stream file');
+    }
   }
 });
 

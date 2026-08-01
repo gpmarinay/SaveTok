@@ -358,10 +358,10 @@
       const extension = typeLabel === 'MP3' ? 'mp3' : 'mp4';
       const filename = `savetok_${typeLabel.toLowerCase()}_${Date.now()}.${extension}`;
       
-      // Point directly to backend proxy endpoint
-      const proxyUrl = `/api/proxy-download?url=${encodeURIComponent(fileUrl)}&filename=${filename}`;
+      // Point directly to backend proxy endpoint with full encoding
+      const proxyUrl = `/api/proxy-download?url=${encodeURIComponent(fileUrl)}&filename=${encodeURIComponent(filename)}`;
 
-      // Trigger immediate browser download via an invisible link
+      // Create temporary hidden link to trigger direct browser file save
       const tempLink = document.createElement('a');
       tempLink.href = proxyUrl;
       tempLink.setAttribute('download', filename);
@@ -369,7 +369,6 @@
       tempLink.click();
       document.body.removeChild(tempLink);
 
-      // Provide UI feedback
       setTimeout(() => {
         activeBtn.innerHTML = `✅ ${typeLabel} Download Started!`;
       }, 1000);
@@ -379,6 +378,7 @@
         activeBtn.style.pointerEvents = "auto";
       }, 3500);
     }
+
     function showError(message) {
       const errorMsg = document.getElementById('error-msg');
       errorMsg.innerText = message;
