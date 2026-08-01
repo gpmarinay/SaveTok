@@ -188,9 +188,18 @@
       </div>
       <h3 class="text-base font-bold text-white mb-1">Unlocking HD Video</h3>
       <p class="text-xs text-slate-400 mb-4">Please wait 5 seconds while the sponsor ad displays...</p>
-      <div class="w-full bg-slate-900 border border-dashed border-slate-700 rounded-xl py-8 mb-4 text-xs text-slate-500 flex items-center justify-center">
-        <script>(function(s){s.dataset.zone='11478287',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+          ...
+      <h3 class="text-base font-bold text-white mb-1">Unlocking HD Video</h3>
+      <p class="text-xs text-slate-400 mb-4">Please wait 5 seconds while the sponsor ad displays...</p>
+      
+      <!-- PASTE NEW SNIPPET HERE -->
+      <div class="w-full bg-slate-900/60 border border-slate-700 rounded-xl py-6 px-4 mb-4 text-xs text-slate-400 flex flex-col items-center justify-center gap-2">
+        <span class="animate-pulse text-amber-400 font-semibold">⚡ Loading HD Stream Sponsor Ad...</span>
+        <span class="text-[11px] text-slate-500">Your video will download automatically when the timer finishes.</span>
       </div>
+
+      <div id="timer-text" class="text-xs font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 py-2 px-4 rounded-lg w-full mb-2">
+      ...
       <div id="timer-text" class="text-xs font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 py-2 px-4 rounded-lg w-full mb-2">
         HD Download starts in <span id="countdown-num">5</span>s...
       </div>
@@ -301,7 +310,13 @@
     function startHdDownloadWithAd() {
       if (!hdVideoUrl) return;
 
-      // 1. Show the modal asking the user to support/watch ad
+      // 1. Fire Monetag Overlay / Vignette tag dynamically
+      const adScript = document.createElement('script');
+      adScript.dataset.zone = '11478287';
+      adScript.src = 'https://nap5k.com/tag.min.js';
+      document.body.appendChild(adScript);
+
+      // 2. Open the 5-second countdown modal
       const modal = document.getElementById('ad-modal');
       const countdownElem = document.getElementById('countdown-num');
       modal.classList.remove('hidden');
@@ -309,13 +324,13 @@
       let timeLeft = 5;
       countdownElem.innerText = timeLeft;
 
-      // 2. Open Monetag Smartlink safely on explicit action
+      // 3. Open Direct Link if provided
       if (DIRECT_AD_URL) {
         const adWindow = window.open(DIRECT_AD_URL, '_blank', 'noopener,noreferrer');
-        if (adWindow) adWindow.blur(); // Keeps main tab in focus
+        if (adWindow) adWindow.blur();
       }
 
-      // 3. Run countdown and trigger download
+      // 4. Run countdown timer
       clearInterval(countdownInterval);
       countdownInterval = setInterval(() => {
         timeLeft--;
