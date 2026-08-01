@@ -50,7 +50,7 @@ app.get('/api/download', async (req, res) => {
   }
 });
 
-// 2. Proxy Media Stream (Fixes CORS issue during direct file download)
+// 2. Secure Proxy Media Stream (Fixes CORS & limits allowed domains)
 app.get('/api/proxy-download', async (req, res) => {
   const fileUrl = req.query.url;
   const filename = req.query.filename || 'download.mp4';
@@ -60,6 +60,24 @@ app.get('/api/proxy-download', async (req, res) => {
   }
 
   try {
+    // SECURITY CHECK: Validate incoming URL structure & origin domain
+    const parsedUrl = new URL(fileUrl);
+    const allowedDomains = [
+      'tiktokcdn.com',
+      'tiktokcdn-us.com',
+      'tiktok.com',
+      'byteoversea.com',
+      'muscdn.com',
+      'ibyteimg.com'
+    ];
+
+    const isAllowed = allowedDomains.some(domain => parsedUrl.hostname.endsWith(domain));
+
+    if (!isAllowed) {
+      return res.status(403).send('Access denied: Unauthorized media domain.');
+    }
+
+    // STREAM FILE: Use axios to fetch and pipe to response
     const response = await axios({
       method: 'get',
       url: fileUrl,
