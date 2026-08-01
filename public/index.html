@@ -7,6 +7,9 @@
   <meta name="monetag" content="68a7adc13c904b8e8fcff3a732a9d1d3">
   <meta name="description" content="Download TikTok videos without watermark in HD quality for free with SaveTok. Fast, safe, and works on iPhone, Android, and Desktop.">
   
+  <!-- Monetag / Ad Tag 1 -->
+  <script src="https://5gvci.com/act/files/tag.min.js?z=11478372" data-cfasync="false" async></script>
+
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -26,11 +29,6 @@
       </span>
     </div>
   </header>
-
-  <!-- TOP AD BANNER PLACEHOLDER -->
-  <div class="w-full bg-slate-800/40 py-2.5 text-center text-xs text-slate-400 border-b border-slate-800 min-h-[50px] flex items-center justify-center">
-    <script>(function(s){s.dataset.zone='11478736',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-  </div>
 
   <!-- MAIN HERO SECTION -->
   <main class="max-w-2xl mx-auto px-4 py-8 w-full flex-1">
@@ -163,7 +161,6 @@
   </main>
 
   <!-- FOOTER -->
-  <!-- FOOTER -->
   <footer class="w-full bg-slate-950 py-6 text-center text-xs text-slate-500 border-t border-slate-800 flex flex-col items-center justify-center gap-3">
     <div class="flex items-center gap-4 text-slate-400 font-medium">
       <a href="/privacy-policy.html" class="hover:text-cyan-400 transition">Privacy Policy</a>
@@ -189,7 +186,6 @@
       <h3 class="text-base font-bold text-white mb-1">Unlocking HD Video</h3>
       <p class="text-xs text-slate-400 mb-4">Please wait 5 seconds while the sponsor ad displays...</p>
       
-      <!-- PASTE NEW SNIPPET HERE -->
       <div class="w-full bg-slate-900/60 border border-slate-700 rounded-xl py-6 px-4 mb-4 text-xs text-slate-400 flex flex-col items-center justify-center gap-2">
         <span class="animate-pulse text-amber-400 font-semibold">⚡ Loading HD Stream Sponsor Ad...</span>
         <span class="text-[11px] text-slate-500">Your video will download automatically when the timer finishes.</span>
@@ -243,7 +239,6 @@
       loading.classList.remove('hidden');
 
       try {
-        // Calls Express server proxy endpoint (/api/download)
         const response = await fetch(`/api/download?url=${encodeURIComponent(urlInput)}`);
         
         const contentType = response.headers.get("content-type");
@@ -305,13 +300,6 @@
     function startHdDownloadWithAd() {
       if (!hdVideoUrl) return;
 
-      // 1. Fire Monetag Overlay / Vignette tag dynamically
-      const adScript = document.createElement('script');
-      adScript.dataset.zone = '11478287';
-      adScript.src = 'https://nap5k.com/tag.min.js';
-      document.body.appendChild(adScript);
-
-      // 2. Open the 5-second countdown modal
       const modal = document.getElementById('ad-modal');
       const countdownElem = document.getElementById('countdown-num');
       modal.classList.remove('hidden');
@@ -319,13 +307,11 @@
       let timeLeft = 5;
       countdownElem.innerText = timeLeft;
 
-      // 3. Open Direct Link if provided
       if (DIRECT_AD_URL) {
         const adWindow = window.open(DIRECT_AD_URL, '_blank', 'noopener,noreferrer');
         if (adWindow) adWindow.blur();
       }
 
-      // 4. Run countdown timer
       clearInterval(countdownInterval);
       countdownInterval = setInterval(() => {
         timeLeft--;
@@ -358,10 +344,8 @@
       const extension = typeLabel === 'MP3' ? 'mp3' : 'mp4';
       const filename = `savetok_${typeLabel.toLowerCase()}_${Date.now()}.${extension}`;
       
-      // Point directly to backend proxy endpoint with full encoding
       const proxyUrl = `/api/proxy-download?url=${encodeURIComponent(fileUrl)}&filename=${encodeURIComponent(filename)}`;
 
-      // Create temporary hidden link to trigger direct browser file save
       const tempLink = document.createElement('a');
       tempLink.href = proxyUrl;
       tempLink.setAttribute('download', filename);
@@ -385,6 +369,8 @@
       errorMsg.classList.remove('hidden');
     }
   </script>
-  
+
+  <!-- Monetag / Vignette Ad Tag 2 -->
+  <script>(function(s){s.dataset.zone='11478210',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
 </body>
 </html>
