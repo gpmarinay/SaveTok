@@ -180,7 +180,7 @@
       <h3 class="text-base font-bold text-white mb-1">Unlocking HD Video</h3>
       <p class="text-xs text-slate-400 mb-4">Please wait 5 seconds while the sponsor ad displays...</p>
       <div class="w-full bg-slate-900 border border-dashed border-slate-700 rounded-xl py-8 mb-4 text-xs text-slate-500 flex items-center justify-center">
-        [ Modal Ad Unit Placement ]
+        <script>(function(s){s.dataset.zone='11478287',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
       </div>
       <div id="timer-text" class="text-xs font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 py-2 px-4 rounded-lg w-full mb-2">
         HD Download starts in <span id="countdown-num">5</span>s...
@@ -292,13 +292,13 @@
     function startHdDownloadWithAd() {
       if (!hdVideoUrl) return;
 
-      // 1. Inject and execute the Monetag Vignette Ad script on HD button click
+      // 1. Fire full-screen vignette ad overlay
       const adScript = document.createElement('script');
       adScript.dataset.zone = '11478210';
       adScript.src = 'https://n6wxm.com/vignette.min.js';
       (document.body || document.documentElement).appendChild(adScript);
 
-      // 2. Show the countdown modal and proceed with the download
+      // 2. Display the modal pop-up
       const modal = document.getElementById('ad-modal');
       const countdownElem = document.getElementById('countdown-num');
       modal.classList.remove('hidden');
