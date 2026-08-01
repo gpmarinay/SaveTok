@@ -163,9 +163,18 @@
   </main>
 
   <!-- FOOTER -->
-  <footer class="w-full bg-slate-950 py-4 text-center text-xs text-slate-500 border-t border-slate-800 flex flex-col items-center justify-center gap-2">
-    <div>https://omg10.com/4/11478340</div>
-    <div class="text-[11px] text-slate-600">© SaveTok. Free TikTok Video Downloader. Not affiliated with TikTok or ByteDance.</div>
+  <!-- FOOTER -->
+  <footer class="w-full bg-slate-950 py-6 text-center text-xs text-slate-500 border-t border-slate-800 flex flex-col items-center justify-center gap-3">
+    <div class="flex items-center gap-4 text-slate-400 font-medium">
+      <a href="/privacy-policy.html" class="hover:text-cyan-400 transition">Privacy Policy</a>
+      <span>•</span>
+      <a href="/terms.html" class="hover:text-cyan-400 transition">Terms of Service</a>
+      <span>•</span>
+      <a href="/dmca.html" class="hover:text-cyan-400 transition">DMCA / Copyright</a>
+    </div>
+    <div class="text-[11px] text-slate-600 max-w-md px-4">
+      © SaveTok. Free TikTok Video Downloader. SaveTok is not affiliated with, endorsed by, or sponsored by TikTok or ByteDance. Users are responsible for obtaining authorization before downloading copyrighted material.
+    </div>
   </footer>
 
   <!-- AD MODAL POPUP -->
@@ -292,13 +301,7 @@
     function startHdDownloadWithAd() {
       if (!hdVideoUrl) return;
 
-      // 1. Fire full-screen vignette ad overlay
-      const adScript = document.createElement('script');
-      adScript.dataset.zone = '11478210';
-      adScript.src = 'https://n6wxm.com/vignette.min.js';
-      (document.body || document.documentElement).appendChild(adScript);
-
-      // 2. Display the modal pop-up
+      // 1. Show the modal asking the user to support/watch ad
       const modal = document.getElementById('ad-modal');
       const countdownElem = document.getElementById('countdown-num');
       modal.classList.remove('hidden');
@@ -306,6 +309,13 @@
       let timeLeft = 5;
       countdownElem.innerText = timeLeft;
 
+      // 2. Open Monetag Smartlink safely on explicit action
+      if (DIRECT_AD_URL) {
+        const adWindow = window.open(DIRECT_AD_URL, '_blank', 'noopener,noreferrer');
+        if (adWindow) adWindow.blur(); // Keeps main tab in focus
+      }
+
+      // 3. Run countdown and trigger download
       clearInterval(countdownInterval);
       countdownInterval = setInterval(() => {
         timeLeft--;
