@@ -22,7 +22,7 @@ app.get('/api/download', async (req, res) => {
   }
 
   try {
-    const endpoint = `https://${process.env.RAPIDAPI_HOST}/rich_response/index?url=${encodeURIComponent(videoUrl)}`;
+    const endpoint = `https://${process.env.RAPIDAPI_HOST}/index?url=${encodeURIComponent(videoUrl)}`;
     
     const response = await axios.get(endpoint, {
       headers: {
