@@ -14,44 +14,56 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // 1. Fetch Video Info Endpoint
-app.get('/api/download', async (req, res) => {
-  const videoUrl = req.query.url;
+// 2. Secure Proxy Media Stream (Optimized for instant chunk streaming)
+app.get('/api/proxy-download', async (req, res) => {
+  const fileUrl = req.query.url;
+  const filename = req.query.filename || 'download.mp4';
 
-  if (!videoUrl) {
-    return res.status(400).json({ error: 'TikTok URL is required' });
+  if (!fileUrl) {
+    return res.status(400).send('File URL is required');
   }
 
   try {
-    const endpoint = `https://${process.env.RAPIDAPI_HOST}/rich_response/index?url=${encodeURIComponent(videoUrl)}`;
-    
-    const response = await axios.get(endpoint, {
+    const response = await axios({
+      method: 'get',
+      url: fileUrl,
+      responseType: 'stream',
+      maxRedirects: 10,
+      timeout: 30000,
+      decompress: false, // Prevents Axios from waiting to decompres bytes
       headers: {
-        'x-rapidapi-key': process.env.RAPIDAPI_KEY,
-        'x-rapidapi-host': process.env.RAPIDAPI_HOST
-      },
-      validateStatus: () => true
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'Accept': '*/*',
+        'Accept-Encoding': 'identity',
+        'Referer': 'https://www.tiktok.com/'
+      }
     });
 
-    if (response.status === 429) {
-      return res.status(429).json({ error: 'Daily API limit reached. Please try again later.' });
+    const safeFilename = filename.replace(/[^a-zA-Z0-9_\.-]/g, '_');
+
+    // Transfer Content-Length if provided so browser shows download progress
+    if (response.headers['content-length']) {
+      res.setHeader('Content-Length', response.headers['content-length']);
     }
 
-    if (response.status !== 200) {
-      return res.status(response.status).json({ 
-        error: response.data.message || `API error (${response.status})` 
-      });
-    }
+    res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}"`);
+    res.setHeader('Content-Type', response.headers['content-type'] || 'video/mp4');
+    res.setHeader('Cache-Control', 'no-cache');
 
-    return res.json(response.data);
+    // Flush headers immediately so browser triggers download save window right away
+    res.flushHeaders();
+
+    // Pipe response stream directly to Express client
+    response.data.pipe(res);
 
   } catch (error) {
-    console.error('Server Error:', error.message);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    console.error('Proxy Error Message:', error.message);
+    if (!res.headersSent) {
+      res.status(500).send(`Failed to stream file: ${error.message}`);
+    }
   }
 });
 
-// 2. Secure Proxy Media Stream (Fixes CORS & limits allowed domains)
-// 2. Secure Proxy Media Stream (Fixes CORS & forces direct download)
 // 2. Secure Proxy Media Stream (Fixes CORS & forces direct download)
 app.get('/api/proxy-download', async (req, res) => {
   const fileUrl = req.query.url;
