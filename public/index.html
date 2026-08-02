@@ -181,7 +181,7 @@
         </svg>
       </div>
       <h3 class="text-base font-bold text-white mb-1">Unlocking HD Video</h3>
-      <p class="text-xs text-slate-400 mb-4">Please wait 5 seconds while the sponsor ad displays...</p>
+      <p class="text-xs text-slate-400 mb-4">Please wait 10 seconds while the sponsor ad displays...</p>
       
       <div class="w-full bg-slate-900/60 border border-slate-700 rounded-xl py-6 px-4 mb-4 text-xs text-slate-400 flex flex-col items-center justify-center gap-2">
         <span class="animate-pulse text-amber-400 font-semibold">⚡ Loading HD Stream Sponsor Ad...</span>
@@ -189,7 +189,7 @@
       </div>
       
       <div id="timer-text" class="text-xs font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 py-2 px-4 rounded-lg w-full mb-2">
-        HD Download starts in <span id="countdown-num">5</span>s...
+        HD Download starts in <span id="countdown-num">10</span>s...
       </div>
       <button onclick="closeAdModal()" class="text-xs text-slate-400 hover:text-slate-200 underline mt-1">
         Cancel
@@ -304,7 +304,7 @@
       const countdownElem = document.getElementById('countdown-num');
       modal.classList.remove('hidden');
 
-      let timeLeft = 5;
+      let timeLeft = 10;
       countdownElem.innerText = timeLeft;
 
       if (DIRECT_AD_URL) {
