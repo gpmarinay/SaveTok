@@ -199,7 +199,7 @@
 
   <script>
     // DEFINE BACKEND HOST
-    const BACKEND_URL = "https://savetok-tiktokvideodownloader.onrender.com/";
+    const BACKEND_URL = "https://savetok-tiktokvideodownloader.onrender.com";
     const DIRECT_AD_URL = ""; 
 
     let hdVideoUrl = "";
@@ -223,7 +223,6 @@
       const errorMsg = document.getElementById('error-msg');
       const loading = document.getElementById('loading');
       const resultBox = document.getElementById('result-box');
-      const downloadBtn = document.querySelector('button[onclick="fetchVideo()"]');
 
       errorMsg.classList.add('hidden');
       resultBox.classList.add('hidden');
@@ -236,12 +235,10 @@
         return;
       }
 
-      // --- INSTANT VISUAL FEEDBACK ---
       loading.classList.remove('hidden');
-      downloadBtn.disabled = true;
-      downloadBtn.classList.add('opacity-75', 'cursor-not-allowed');
 
       try {
+        // UPDATED: Now points directly to your Render Backend Server
         const response = await fetch(`${BACKEND_URL}/api/download?url=${encodeURIComponent(urlInput)}`);
         
         const contentType = response.headers.get("content-type");
@@ -250,6 +247,7 @@
         }
 
         const data = await response.json();
+        loading.classList.add('hidden');
 
         if (!response.ok) {
           showError(data.error || `Error (${response.status})`);
@@ -293,12 +291,9 @@
         }
 
       } catch (err) {
+        loading.classList.add('hidden');
         console.error("Fetch error:", err);
         showError(`Connection Error: ${err.message}`);
-      } finally {
-        loading.classList.add('hidden');
-        downloadBtn.disabled = false;
-        downloadBtn.classList.remove('opacity-75', 'cursor-not-allowed');
       }
     }
 
@@ -343,23 +338,21 @@
       if (typeLabel === 'MP3') activeBtn = document.getElementById('mp3-btn');
 
       const originalText = activeBtn.innerHTML;
-      activeBtn.innerHTML = `⏳ Connecting Stream...`;
+      activeBtn.innerHTML = `⏳ Starting Download...`;
       activeBtn.style.pointerEvents = "none";
 
       const extension = typeLabel === 'MP3' ? 'mp3' : 'mp4';
       const filename = `savetok_${typeLabel.toLowerCase()}_${Date.now()}.${extension}`;
       
+      // UPDATED: Now routes the proxy download request through Render Backend
       const proxyUrl = `${BACKEND_URL}/api/proxy-download?url=${encodeURIComponent(fileUrl)}&filename=${encodeURIComponent(filename)}`;
 
-      // Use hidden iframe to trigger download directly without tab changes
-      let downloadFrame = document.getElementById('download-iframe');
-      if (!downloadFrame) {
-        downloadFrame = document.createElement('iframe');
-        downloadFrame.id = 'download-iframe';
-        downloadFrame.style.display = 'none';
-        document.body.appendChild(downloadFrame);
-      }
-      downloadFrame.src = proxyUrl;
+      const tempLink = document.createElement('a');
+      tempLink.href = proxyUrl;
+      tempLink.setAttribute('download', filename);
+      document.body.appendChild(tempLink);
+      tempLink.click();
+      document.body.removeChild(tempLink);
 
       setTimeout(() => {
         activeBtn.innerHTML = `✅ ${typeLabel} Download Started!`;

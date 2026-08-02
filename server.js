@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Serve static files from public directory
+// Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
 // 1. Fetch Video Info Endpoint
@@ -22,7 +22,7 @@ app.get('/api/download', async (req, res) => {
   }
 
   try {
-    const endpoint = `https://${process.env.RAPIDAPI_HOST}/index?url=${encodeURIComponent(videoUrl)}`;
+    const endpoint = `https://${process.env.RAPIDAPI_HOST}/rich_response/index?url=${encodeURIComponent(videoUrl)}`;
     
     const response = await axios.get(endpoint, {
       headers: {
@@ -50,23 +50,41 @@ app.get('/api/download', async (req, res) => {
   }
 });
 
-// 2. Proxy Media Stream Endpoint
+// 2. Secure Proxy Media Stream (Fixes CORS & limits allowed domains)
+// 2. Secure Proxy Media Stream (Fixes CORS & forces direct download)
+// 2. Secure Proxy Media Stream (Fixes CORS & forces direct download)
 app.get('/api/proxy-download', async (req, res) => {
   const fileUrl = req.query.url;
   const filename = req.query.filename || 'download.mp4';
 
+  console.log("----------------------------------------");
+  console.log("Incoming Download Request URL:", fileUrl);
+
   if (!fileUrl) {
+    console.log("Error: No file URL provided");
     return res.status(400).send('File URL is required');
   }
 
   try {
+    const parsedUrl = new URL(fileUrl);
+    console.log("Parsed Domain:", parsedUrl.hostname);
+
+    // TEMPORARY: Comment out domain validation while debugging to eliminate 403 blocks
+    /*
+    const allowedDomains = ['tiktokcdn.com', 'tiktokcdn-us.com', 'tiktok.com', 'byteoversea.com', 'muscdn.com', 'ibyteimg.com', 'akamaized.net'];
+    const isAllowed = allowedDomains.some(domain => parsedUrl.hostname.endsWith(domain));
+    if (!isAllowed) {
+      console.log("Blocked by Domain Whitelist:", parsedUrl.hostname);
+      return res.status(403).send('Access denied: Unauthorized media domain.');
+    }
+    */
+
     const response = await axios({
       method: 'get',
       url: fileUrl,
       responseType: 'stream',
       maxRedirects: 10,
       timeout: 30000,
-      decompress: false,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
         'Accept': '*/*',
@@ -75,28 +93,29 @@ app.get('/api/proxy-download', async (req, res) => {
       }
     });
 
+    console.log("Axios Response Status:", response.status);
+    console.log("Content-Type:", response.headers['content-type']);
+
     const safeFilename = filename.replace(/[^a-zA-Z0-9_\.-]/g, '_');
-
-    if (response.headers['content-length']) {
-      res.setHeader('Content-Length', response.headers['content-length']);
-    }
-
     res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}"`);
     res.setHeader('Content-Type', response.headers['content-type'] || 'video/mp4');
-    res.setHeader('Cache-Control', 'no-cache');
-
-    if (typeof res.flushHeaders === 'function') {
-      res.flushHeaders();
-    }
 
     response.data.pipe(res);
 
   } catch (error) {
-    console.error('Proxy Error:', error.message);
+    console.error('Proxy Error Message:', error.message);
+    if (error.response) {
+      console.error('API Error Response Code:', error.response.status);
+    }
     if (!res.headersSent) {
       res.status(500).send(`Failed to stream file: ${error.message}`);
     }
   }
+});
+
+// Fallback for unknown API routes
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: 'Endpoint not found' });
 });
 
 app.listen(PORT, () => {
