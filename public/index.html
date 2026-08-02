@@ -13,8 +13,6 @@
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Monetag Ad Scripts (Safely Loaded in Head with Async/Defer) -->
-  
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans selection:bg-cyan-500 selection:text-white">
 
@@ -199,6 +197,8 @@
   </div>
 
   <script>
+    // DEFINE BACKEND HOST
+    const BACKEND_URL = "https://savetok-tiktokvideodownloader.onrender.com";
     const DIRECT_AD_URL = ""; 
 
     let hdVideoUrl = "";
@@ -237,7 +237,8 @@
       loading.classList.remove('hidden');
 
       try {
-        const response = await fetch(`/api/download?url=${encodeURIComponent(urlInput)}`);
+        // UPDATED: Now points directly to your Render Backend Server
+        const response = await fetch(`${BACKEND_URL}/api/download?url=${encodeURIComponent(urlInput)}`);
         
         const contentType = response.headers.get("content-type");
         if (!contentType || !contentType.includes("application/json")) {
@@ -342,7 +343,8 @@
       const extension = typeLabel === 'MP3' ? 'mp3' : 'mp4';
       const filename = `savetok_${typeLabel.toLowerCase()}_${Date.now()}.${extension}`;
       
-      const proxyUrl = `/api/proxy-download?url=${encodeURIComponent(fileUrl)}&filename=${encodeURIComponent(filename)}`;
+      // UPDATED: Now routes the proxy download request through Render Backend
+      const proxyUrl = `${BACKEND_URL}/api/proxy-download?url=${encodeURIComponent(fileUrl)}&filename=${encodeURIComponent(filename)}`;
 
       const tempLink = document.createElement('a');
       tempLink.href = proxyUrl;
