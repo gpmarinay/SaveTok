@@ -126,9 +126,7 @@ app.get('/api/proxy-download', async (req, res) => {
 });
 
 // Fallback for unknown API routes
-app.use('/api', (req, res) => {
-  res.status(404).json({ error: 'Endpoint not found' });
-});
+
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
