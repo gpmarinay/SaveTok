@@ -343,25 +343,26 @@
 
       const extension = typeLabel === 'MP3' ? 'mp3' : 'mp4';
       const filename = `savetok_${typeLabel.toLowerCase()}_${Date.now()}.${extension}`;
-      
-      // UPDATED: Now routes the proxy download request through Render Backend
-      const proxyUrl = `${BACKEND_URL}/api/proxy-download?url=${encodeURIComponent(fileUrl)}&filename=${encodeURIComponent(filename)}`;
 
+      // DIRECT DOWNLOAD APPROACH (Instant start):
       const tempLink = document.createElement('a');
-      tempLink.href = proxyUrl;
+      tempLink.href = fileUrl;
+      tempLink.target = '_blank'; // Opens directly if browser blocks inline download
       tempLink.setAttribute('download', filename);
+      tempLink.setAttribute('rel', 'noopener noreferrer');
+      
       document.body.appendChild(tempLink);
       tempLink.click();
       document.body.removeChild(tempLink);
 
       setTimeout(() => {
         activeBtn.innerHTML = `✅ ${typeLabel} Download Started!`;
-      }, 1000);
+      }, 500);
 
       setTimeout(() => {
         activeBtn.innerHTML = originalText;
         activeBtn.style.pointerEvents = "auto";
-      }, 3500);
+      }, 2500);
     }
 
     function showError(message) {
