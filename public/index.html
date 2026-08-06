@@ -53,13 +53,26 @@
             id="tiktok-url" 
             type="url" 
             placeholder="Paste TikTok link here (e.g. https://vm.tiktok.com/...)" 
-            class="w-full bg-slate-900 border border-slate-700 text-white placeholder-slate-500 text-sm sm:text-base pl-4 pr-20 py-3.5 rounded-xl focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition"
+            class="w-full bg-slate-900 border border-slate-700 text-white placeholder-slate-500 text-sm sm:text-base pl-4 pr-36 py-3.5 rounded-xl focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition"
+            oninput="toggleClearButton()"
           />
-          <button 
-            onclick="pasteClipboard()" 
-            class="absolute right-2 text-xs bg-slate-800 hover:bg-slate-700 text-cyan-400 font-semibold px-3 py-2 rounded-lg border border-slate-700 transition active:scale-95">
-            📋 Paste
-          </button>
+
+          <div class="absolute right-2 flex items-center space-x-1.5">
+            <!-- Translucent Clear Button -->
+            <button 
+              id="clear-btn"
+              onclick="clearInput()" 
+              class="hidden text-xs bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white font-medium px-2.5 py-2 rounded-lg border border-slate-600/40 backdrop-blur-sm transition active:scale-95">
+              ✕ Clear
+            </button>
+
+            <!-- Paste Button -->
+            <button 
+              onclick="pasteClipboard()" 
+              class="text-xs bg-slate-800 hover:bg-slate-700 text-cyan-400 font-semibold px-3 py-2 rounded-lg border border-slate-700 transition active:scale-95">
+              📋 Paste
+            </button>
+          </div>
         </div>
 
         <button 
@@ -218,6 +231,23 @@
     let sdVideoUrl = "";
     let mp3AudioUrl = "";
     let countdownInterval = null;
+
+    function toggleClearButton() {
+      const input = document.getElementById('tiktok-url');
+      const clearBtn = document.getElementById('clear-btn');
+      
+      if (input.value.trim().length > 0) {
+        clearBtn.classList.remove('hidden');
+      } else {
+        clearBtn.classList.add('hidden');
+      }
+    }
+    function clearInput() {
+      const input = document.getElementById('tiktok-url');
+      input.value = '';
+      toggleClearButton();
+      input.focus();
+    }
 
     async function pasteClipboard() {
       try {
