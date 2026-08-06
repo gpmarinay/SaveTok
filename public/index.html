@@ -253,7 +253,13 @@
       try {
         const text = await navigator.clipboard.readText();
         if (text) {
-          document.getElementById('tiktok-url').value = text;
+          const input = document.getElementById('tiktok-url');
+          input.value = text;
+          
+          // Manually call toggleClearButton so "✕ Clear" appears immediately
+          if (typeof toggleClearButton === 'function') {
+            toggleClearButton();
+          }
         }
       } catch (err) {
         alert("Clipboard access permission denied. Please paste manually.");
